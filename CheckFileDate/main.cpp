@@ -4,7 +4,7 @@
 #include <string>
 #include <Windows.h>
 
-int find_all_files(const char *path, const char *date);
+int find_all_files(const char *path, const FILETIME& date);
 
 int main(int argc, char *argv[])
 {
@@ -28,12 +28,18 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    SYSTEMTIME st;
+    sscanf(date, "%d-%d-%d %d:%d:%d", &st.wYear, &st.wMonth, &st.wDay, &st.wHour, &st.wMinute, &st.wSecond);
+
+    FILETIME ft;
+    SystemTimeToFileTime(&st, &ft);
+
     if (date != NULL) {
-        find_all_files(argv[optind], date);
+        find_all_files(argv[optind], ft);
     }
 }
 
-int find_all_files(const char *path, const char *date)
+int find_all_files(const char *path, const FILETIME& date)
 {
     std::string strFind = path;
     strFind += "\\*.*";
@@ -53,14 +59,10 @@ int find_all_files(const char *path, const char *date)
             }
         }
         else {
-            SYSTEMTIME st;
-            sscanf(date, "%d-%d-%d %d:%d:%d", &st.wYear, &st.wMonth, &st.wDay, &st.wHour, &st.wMinute, &st.wSecond);
-
-            FILETIME ft, ftFileLastWrite;
-            SystemTimeToFileTime(&st, &ft);
+            FILETIME ftFileLastWrite;
             FileTimeToLocalFileTime(&findData.ftLastWriteTime, &ftFileLastWrite); // findData.ftLastWriteTime is UTC time
             
-            if (CompareFileTime(&ftFileLastWrite, &ft) == 1) {
+            if (CompareFileTime(&ftFileLastWrite, &date) == 1) {
                 printf("%s\\%s\n", path, findData.cFileName);
 
                 std::string fullPath = path;
