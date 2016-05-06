@@ -8,3 +8,6 @@ We want to know when did folder's files modified sometime, but on Windows, only 
 `CheckFileDate [-n date] path`
 
 * **-n** list files newer than *date*, *date* **must** be in format "2016-05-04 21:30:00"
+
+### Todo
+Add -r option to recover files from backup.
